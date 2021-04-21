@@ -3,14 +3,18 @@
 using namespace okapi;
 
 Controller controller;
-ControllerButton indexUp (ControllerDigital::R1);
-ControllerButton indexDown (ControllerDigital::R2);
-Motor rollers1 (-3);
-Motor rollers2 (-4);
-Motor frontLeftDrive (2);
-Motor backLeftDrive (1);
-Motor frontRightDrive (-8);
-Motor backRightDrive (-9);
+ControllerButton indexUp (ControllerDigital::L1);
+ControllerButton indexDown (ControllerDigital::L2);
+ControllerButton intakesIn (ControllerDigital::R1);
+ControllerButton intakesOut (ControllerDigital::R2);
+Motor rollers1 (-9);
+Motor rollers2 (-10);
+Motor frontLeftDrive (-2);
+Motor backLeftDrive (-1);
+Motor frontRightDrive (3);
+Motor backRightDrive (4);
+Motor leftIntake (19);
+Motor rightIntake (20);
 
 void initialize() {
 	pros::lcd::initialize();
@@ -18,6 +22,8 @@ void initialize() {
 
 	rollers1.setGearing(AbstractMotor::gearset::blue);
 	rollers2.setGearing(AbstractMotor::gearset::blue);
+	leftIntake.setGearing(AbstractMotor::gearset::green);
+	rightIntake.setGearing(AbstractMotor::gearset::green);
 }
 
 void disabled() {}
@@ -48,6 +54,17 @@ void opcontrol() {
 		} else {
 			rollers1.moveVelocity(0);
 			rollers2.moveVelocity(0);
+		}
+
+		if (intakesIn.isPressed()) {
+			leftIntake.moveVelocity(200);
+			rightIntake.moveVelocity(200);
+		} else if (intakesOut.isPressed()) {
+			leftIntake.moveVelocity(-200);
+			rightIntake.moveVelocity(-200);
+		} else {
+			leftIntake.moveVelocity(0);
+			rightIntake.moveVelocity(0);
 		}
 
 		pros::delay(20);
