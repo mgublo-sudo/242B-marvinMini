@@ -11,10 +11,10 @@ Motor rollers1 (-9);
 Motor rollers2 (-10);
 Motor frontLeftDrive (-2);
 Motor backLeftDrive (-1);
-Motor frontRightDrive (3);
-Motor backRightDrive (4);
+Motor frontRightDrive (4);
+Motor backRightDrive (3);
 Motor leftIntake (19);
-Motor rightIntake (20);
+Motor rightIntake (-20);
 
 void initialize() {
 	pros::lcd::initialize();
