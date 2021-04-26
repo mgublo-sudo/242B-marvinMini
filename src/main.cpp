@@ -7,14 +7,14 @@ ControllerButton indexUp (ControllerDigital::L1);
 ControllerButton indexDown (ControllerDigital::L2);
 ControllerButton intakesIn (ControllerDigital::R1);
 ControllerButton intakesOut (ControllerDigital::R2);
-Motor rollers1 (-9);
-Motor rollers2 (-10);
+Motor rollers1 (9);
+Motor rollers2 (10);
 Motor frontLeftDrive (-2);
 Motor backLeftDrive (-1);
 Motor frontRightDrive (4);
 Motor backRightDrive (3);
-Motor leftIntake (19);
-Motor rightIntake (-20);
+Motor leftIntake (-19);
+Motor rightIntake (20);
 
 void initialize() {
 	pros::lcd::initialize();
@@ -22,8 +22,12 @@ void initialize() {
 
 	rollers1.setGearing(AbstractMotor::gearset::blue);
 	rollers2.setGearing(AbstractMotor::gearset::blue);
-	leftIntake.setGearing(AbstractMotor::gearset::green);
-	rightIntake.setGearing(AbstractMotor::gearset::green);
+	leftIntake.setGearing(AbstractMotor::gearset::blue);
+	rightIntake.setGearing(AbstractMotor::gearset::blue);
+	frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+  	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+  	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+  	backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
 }
 
 void disabled() {}
@@ -72,27 +76,32 @@ void opcontrol() {
 		drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
 									controller.getAnalog(ControllerAnalog::rightX));
 
-		if (indexUp.isPressed()) {
-			rollers1.moveVelocity(600);
-			rollers2.moveVelocity(600);
-		} else if (indexDown.isPressed()) {
-			rollers1.moveVelocity(-600);
-			rollers2.moveVelocity(-600);
-		} else {
-			rollers1.moveVelocity(0);
-			rollers2.moveVelocity(0);
-		}
-
 		if (intakesIn.isPressed()) {
-			leftIntake.moveVelocity(200);
-			rightIntake.moveVelocity(200);
-		} else if (intakesOut.isPressed()) {
-			leftIntake.moveVelocity(-200);
-			rightIntake.moveVelocity(-200);
+			leftIntake.moveVelocity(300);
+			rightIntake.moveVelocity(300);
 		} else {
 			leftIntake.moveVelocity(0);
 			rightIntake.moveVelocity(0);
 		}
+		if (indexUp.isPressed()) {
+			rollers1.moveVelocity(600);
+			rollers2.moveVelocity(600);
+		} else {
+			rollers1.moveVelocity(0);
+			rollers2.moveVelocity(0);
+		}
+		if (indexDown.isPressed()) {
+			rollers1.moveVelocity(-600);
+			rollers2.moveVelocity(-600);
+			leftIntake.moveVelocity(-300);
+			rightIntake.moveVelocity(-300);
+		}
+		// else {
+		// 	rollers1.moveVelocity(0);
+		// 	rollers2.moveVelocity(0);
+		// 	leftIntake.moveVelocity(0);
+		// 	rightIntake.moveVelocity(0);
+		// }
 
 		pros::delay(20);
 	}
