@@ -22,8 +22,8 @@ void initialize() {
 
 	rollers1.setGearing(AbstractMotor::gearset::blue);
 	rollers2.setGearing(AbstractMotor::gearset::blue);
-	leftIntake.setGearing(AbstractMotor::gearset::blue);
-	rightIntake.setGearing(AbstractMotor::gearset::blue);
+	leftIntake.setGearing(AbstractMotor::gearset::green);
+	rightIntake.setGearing(AbstractMotor::gearset::green);
 	frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
   	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
   	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
@@ -36,30 +36,24 @@ void competition_initialize() {}
 
 void autonomous() {
 	std::shared_ptr<ChassisController> myChassis =
-  ChassisControllerBuilder()
-    .withMotors(
-		 {frontLeftDrive, backLeftDrive},
-		 {frontRightDrive, backRightDrive}
-		 )
-    // Green gearset, 4 in wheel diam, 11.5 in wheel track
-    .withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.5_in}, imev5GreenTPR})
-    .build();
+	ChassisControllerBuilder()
+		.withMotors(
+			{frontLeftDrive, backLeftDrive},
+			{frontRightDrive, backRightDrive}
+			)
+		// Green gearset, 4 in wheel diam, 11.5 in wheel track
+		.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
+		.build();
 
-std::shared_ptr<AsyncMotionProfileController> profileController = 
-  AsyncMotionProfileControllerBuilder()
-    .withLimits({
-      1.0, // Maximum linear velocity of the Chassis in m/s
-      2.0, // Maximum linear acceleration of the Chassis in m/s/s
-      10.0 // Maximum linear jerk of the Chassis in m/s/s/s
-    })
-    .withOutput(myChassis)
-    .buildMotionProfileController();
-
-  profileController->generatePath(
-    {{0_ft, 0_ft, 0_deg}, {3_ft, 3_ft, 0_deg}}, "A");
-
-  profileController->setTarget("A");
-  profileController->waitUntilSettled();
+	std::shared_ptr<AsyncMotionProfileController> profileController = 
+	AsyncMotionProfileControllerBuilder()
+		.withLimits({
+		1.0, // Maximum linear velocity of the Chassis in m/s
+		2.0, // Maximum linear acceleration of the Chassis in m/s/s
+		10.0 // Maximum linear jerk of the Chassis in m/s/s/s
+		})
+		.withOutput(myChassis)
+		.buildMotionProfileController();
 
 }
 
@@ -77,8 +71,8 @@ void opcontrol() {
 									controller.getAnalog(ControllerAnalog::rightX));
 
 		if (intakesIn.isPressed()) {
-			leftIntake.moveVelocity(300);
-			rightIntake.moveVelocity(300);
+			leftIntake.moveVelocity(200);
+			rightIntake.moveVelocity(200);
 		} else {
 			leftIntake.moveVelocity(0);
 			rightIntake.moveVelocity(0);
@@ -93,8 +87,8 @@ void opcontrol() {
 		if (indexDown.isPressed()) {
 			rollers1.moveVelocity(-600);
 			rollers2.moveVelocity(-600);
-			leftIntake.moveVelocity(-300);
-			rightIntake.moveVelocity(-300);
+			leftIntake.moveVelocity(-200);
+			rightIntake.moveVelocity(-200);
 		}
 		// else {
 		// 	rollers1.moveVelocity(0);
