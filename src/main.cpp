@@ -8,7 +8,7 @@ ControllerButton indexDown (ControllerDigital::L2);
 ControllerButton intakesIn (ControllerDigital::R1);
 ControllerButton intakesOut (ControllerDigital::R2);
 Motor rollers1 (9);
-Motor rollers2 (10);
+Motor rollers2 (-10);
 Motor frontLeftDrive (-2);
 Motor backLeftDrive (-1);
 Motor frontRightDrive (4);
