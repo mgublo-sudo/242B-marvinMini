@@ -3,9 +3,9 @@
 using namespace okapi;
 
 Controller controller;
-ControllerButton rollersUp (ControllerDigital::L1);
-ControllerButton rollersDown (ControllerDigital::L2);
-ControllerButton intake (ControllerDigital::R1);
+ControllerButton indexUpBtn (ControllerDigital::L1);
+ControllerButton extakeBtn (ControllerDigital::L2);
+ControllerButton intakeBtn (ControllerDigital::R1);
 ControllerButton test (ControllerDigital::R2);
 Motor lowerRollers (9);
 Motor upperRoller (-10);
@@ -35,19 +35,19 @@ void intakesOff() {
 }
 
 //Indexer Rollers Up Function
-void bothRollersUp() {
+void indexerUp() {
 	upperRoller.moveVelocity(600);
 	lowerRollers.moveVelocity(600);
 }
 
 //Indexer Rollers Down Function
-void bothRollersDown() {
+void indexerDown() {
 	upperRoller.moveVelocity(-600);
 	lowerRollers.moveVelocity(-600);
 }
 
 //Stop Indexer Rollers Function
-void bothRollersOff() {
+void indexerOff() {
 	upperRoller.moveVelocity(0);
 	lowerRollers.moveVelocity(0);
 }
@@ -63,20 +63,20 @@ void lowerIndexerOff() {
 }
 
 void ballIntake() {
-	if (intake.isPressed()) {
+	if (intakeBtn.isPressed()) {
 		intakesIn();
 		lowerIndexer();
 	}
 }
 void ballExtake() {
-	if (rollersDown.isPressed()) {
+	if (extakeBtn.isPressed()) {
 		intakesOut();
-		bothRollersDown();
+		indexerDown();
 	}
 }
 void indexUp() {
-	if (rollersUp.isPressed()) {
-		bothRollersUp();
+	if (indexUpBtn.isPressed()) {
+		indexerUp();
 	}
 }
 
@@ -85,7 +85,7 @@ void ballFunctions() {
 	while(true) {
 		if (!(intake.isPressed() | rollersDown.isPressed() | rollersUp.isPressed())) {
 			intakesOff();
-			bothRollersOff();
+			indexerOff();
 		} else {
 			ballIntake();
 			ballExtake();
