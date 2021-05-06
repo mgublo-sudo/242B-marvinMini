@@ -3,12 +3,12 @@
 using namespace okapi;
 
 Controller controller;
-ControllerButton indexUp (ControllerDigital::L1);
-ControllerButton indexDown (ControllerDigital::L2);
-ControllerButton intakesIn (ControllerDigital::R1);
-ControllerButton intakesOut (ControllerDigital::R2);
-Motor rollers1 (9);
-Motor rollers2 (-10);
+ControllerButton rollersUp (ControllerDigital::L1);
+ControllerButton rollersDown (ControllerDigital::L2);
+ControllerButton intake (ControllerDigital::R1);
+ControllerButton test (ControllerDigital::R2);
+Motor lowerRollers (9);
+Motor upperRoller (-10);
 Motor frontLeftDrive (-2);
 Motor backLeftDrive (-1);
 Motor frontRightDrive (4);
@@ -16,12 +16,92 @@ Motor backRightDrive (3);
 Motor leftIntake (-19);
 Motor rightIntake (20);
 
+//Intakes In Function
+void intakesIn() {
+	leftIntake.moveVelocity(600);
+	rightIntake.moveVelocity(600);
+}
+
+//Intakes Out Function
+void intakesOut() {
+	leftIntake.moveVelocity(-600);
+	rightIntake.moveVelocity(-600);
+}
+
+//Stop Intakes Function
+void intakesOff() {
+	leftIntake.moveVelocity(0);
+	rightIntake.moveVelocity(0);
+}
+
+//Indexer Rollers Up Function
+void bothRollersUp() {
+	upperRoller.moveVelocity(600);
+	lowerRollers.moveVelocity(600);
+}
+
+//Indexer Rollers Down Function
+void bothRollersDown() {
+	upperRoller.moveVelocity(-600);
+	lowerRollers.moveVelocity(-600);
+}
+
+//Stop Indexer Rollers Function
+void bothRollersOff() {
+	upperRoller.moveVelocity(0);
+	lowerRollers.moveVelocity(0);
+}
+
+//Lower Indexer Rollers Function
+void lowerIndexer() {
+	lowerRollers.moveVelocity(200);
+}
+
+//Stop Lower Indexer Rollers Function
+void lowerIndexerOff() {
+	lowerRollers.moveVelocity(0);
+}
+
+void ballIntake() {
+	if (intake.isPressed()) {
+		intakesIn();
+		lowerIndexer();
+	}
+}
+void ballExtake() {
+	if (rollersDown.isPressed()) {
+		intakesOut();
+		bothRollersDown();
+	}
+}
+void indexUp() {
+	if (rollersUp.isPressed()) {
+		bothRollersUp();
+	}
+}
+
+
+void ballFunctions() {
+	while(true) {
+		if (!(intake.isPressed() | rollersDown.isPressed() | rollersUp.isPressed())) {
+			intakesOff();
+			bothRollersOff();
+		} else {
+			ballIntake();
+			ballExtake();
+			indexUp();
+		}
+
+		pros::delay(20);
+	}
+}
+
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(2, "marvin mini - woo hoo!");
 
-	rollers1.setGearing(AbstractMotor::gearset::blue);
-	rollers2.setGearing(AbstractMotor::gearset::blue);
+	lowerRollers.setGearing(AbstractMotor::gearset::blue);
+	upperRoller.setGearing(AbstractMotor::gearset::blue);
 	leftIntake.setGearing(AbstractMotor::gearset::green);
 	rightIntake.setGearing(AbstractMotor::gearset::green);
 	frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
@@ -66,36 +146,12 @@ void opcontrol() {
 	 .withDimensions(AbstractMotor::gearset::blue, {{4_in, 8_in}, imev5BlueTPR})
 	 .build();
 
+	pros::Task ballFunctionsTask(ballFunctions);
+	ballFunctionsTask.resume();
+
 	while (true) {
 		drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
 									controller.getAnalog(ControllerAnalog::rightX));
-
-		if (intakesIn.isPressed()) {
-			leftIntake.moveVelocity(200);
-			rightIntake.moveVelocity(200);
-		} else {
-			leftIntake.moveVelocity(0);
-			rightIntake.moveVelocity(0);
-		}
-		if (indexUp.isPressed()) {
-			rollers1.moveVelocity(600);
-			rollers2.moveVelocity(600);
-		} else {
-			rollers1.moveVelocity(0);
-			rollers2.moveVelocity(0);
-		}
-		if (indexDown.isPressed()) {
-			rollers1.moveVelocity(-600);
-			rollers2.moveVelocity(-600);
-			leftIntake.moveVelocity(-200);
-			rightIntake.moveVelocity(-200);
-		}
-		// else {
-		// 	rollers1.moveVelocity(0);
-		// 	rollers2.moveVelocity(0);
-		// 	leftIntake.moveVelocity(0);
-		// 	rightIntake.moveVelocity(0);
-		// }
 
 		pros::delay(20);
 	}
