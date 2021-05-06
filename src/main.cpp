@@ -83,7 +83,7 @@ void indexUp() {
 
 void ballFunctions() {
 	while(true) {
-		if (!(intake.isPressed() | rollersDown.isPressed() | rollersUp.isPressed())) {
+		if (!(intakeBtn.isPressed() | extakeBtn.isPressed() | indexUpBtn.isPressed())) {
 			intakesOff();
 			indexerOff();
 		} else {
