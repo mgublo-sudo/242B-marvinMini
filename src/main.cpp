@@ -11,6 +11,7 @@ ControllerButton indexUpBtn (ControllerDigital::L1);
 ControllerButton extakeBtn (ControllerDigital::L2);
 ControllerButton intakeBtn (ControllerDigital::R1);
 ControllerButton test (ControllerDigital::R2);
+ControllerButton slowExtakeBtn (ControllerDigital::A);
 Motor lowerRollers (15);
 Motor upperRoller (-1);
 Motor frontLeftDrive (-17);
@@ -30,6 +31,11 @@ void intakesIn() {
 void intakesOut() {
 	leftIntake.moveVelocity(-600);
 	rightIntake.moveVelocity(-600);
+}
+
+void intakesOutSlow() {
+	leftIntake.moveVelocity(-200);
+	rightIntake.moveVelocity(-200);
 }
 
 //Stop Intakes Function
@@ -83,17 +89,23 @@ void indexUp() {
 		indexerUp();
 	}
 }
+void ballExtakeSlow() {
+	if (slowExtakeBtn.isPressed()) {
+		intakesOutSlow();
+	}
+}
 
 
 void ballFunctions() {
 	while(true) {
-		if (!(intakeBtn.isPressed() | extakeBtn.isPressed() | indexUpBtn.isPressed())) {
+		if (!(intakeBtn.isPressed() | extakeBtn.isPressed() | indexUpBtn.isPressed() | slowExtakeBtn.isPressed())) {
 			intakesOff();
 			indexerOff();
 		} else {
 			ballIntake();
 			ballExtake();
 			indexUp();
+			ballExtakeSlow();
 		}
 
 		pros::delay(20);
@@ -108,10 +120,10 @@ void initialize() {
 	upperRoller.setGearing(AbstractMotor::gearset::blue);
 	leftIntake.setGearing(AbstractMotor::gearset::green);
 	rightIntake.setGearing(AbstractMotor::gearset::green);
-	// frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
-  	// frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
-  	// backRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
-  	// backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+	frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+  	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+  	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+  	backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
 }
 
 void disabled() {}
@@ -119,7 +131,7 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-	std::shared_ptr<ChassisController> myChassis =
+	std::shared_ptr<ChassisController> myStraightChassis =
 	ChassisControllerBuilder()
 		.withMotors(
 			{frontLeftDrive, backLeftDrive},
@@ -129,92 +141,73 @@ void autonomous() {
 		.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
 		.build();
 
-	std::shared_ptr<AsyncMotionProfileController> profileController = 
+	std::shared_ptr<AsyncMotionProfileController> straightProfileController = 
 	AsyncMotionProfileControllerBuilder()
 		.withLimits({
 		1.0, // Maximum linear velocity of the Chassis in m/s
 		2.0, // Maximum linear acceleration of the Chassis in m/s/s
 		10.0 // Maximum linear jerk of the Chassis in m/s/s/s
 		})
-		.withOutput(myChassis)
+		.withOutput(myStraightChassis)
 		.buildMotionProfileController();
 
-	profileController->generatePath(
-		{{0_ft, 0_ft, 25.9_deg}, {4_ft, -1_ft, 115.9_deg}}, "A");
-	profileController->setTarget("A");
-	profileController->generatePath(
-		{{4_ft, -1_ft, 115.9_deg}, {2_ft, 2_ft, 200_deg}}, "B");
-	profileController->waitUntilSettled();
-	profileController->setTarget("B", true);
-	profileController->waitUntilSettled();
-	profileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {8_ft, -4_ft, 00_deg}}, "C");
-	profileController->setTarget("C");
-	profileController->waitUntilSettled();
+	// 3.2ft is pretty close to 360_deg
+	std::shared_ptr<ChassisController> myTurnChassis =
+	ChassisControllerBuilder()
+		.withMotors(
+			{frontLeftDrive, backLeftDrive},
+			{-18, -19}
+			)
+		// Green gearset, 4 in wheel diam, 11.5 in wheel track
+		.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
+		.build();
 
-	// std::shared_ptr<OdomChassisController> myOdomChassis =
-	// ChassisControllerBuilder()
-	// 	.withMotors(
-	// 		{frontLeftDrive, backLeftDrive},
-	// 		{frontRightDrive, backRightDrive}
-	// 		)
-	// 	.withGains(
-    //     {0.001, 0, 0.0001}, // Distance controller gains
-    //     {0.001, 0, 0.0001}, // Turn controller gains
-    //     {0.001, 0, 0.0001}  // Angle controller gains (helps drive straight)
-    // 	)
-	// 	// Green gearset, 4 in wheel diam, 11.5 in wheel track
-	// 	.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
-	// 	.withOdometry() // use the same scales as the chassis (above)
-    // 	.buildOdometry(); // build an odometry chassis
+	std::shared_ptr<AsyncMotionProfileController> turnProfileController = 
+	AsyncMotionProfileControllerBuilder()
+		.withLimits({
+		1.5, // Maximum linear velocity of the Chassis in m/s
+		2.0, // Maximum linear acceleration of the Chassis in m/s/s
+		10.0 // Maximum linear jerk of the Chassis in m/s/s/s
+		})
+		.withOutput(myTurnChassis)
+		.buildMotionProfileController();
 
-	// Timer().placeMark();
-	// fputs("Time, X, Y, Theta, FlmEnc, BlmEnc, FrmEnc, BrmEnc, FlmVolt, BlmVolt, FrmVolt, BrmVolt, FlmVelo, BlmVelo, FrmVelo, BrmVelo", usd_file_write);
-  	// pros::Task([&] { while(true)   {
-    // 	pros::delay(10); //20 Updates per Second
-    //     // printf("%s\n", chassisAuto->getState().str().c_str());
-    //     // printf("Left encoder value: %d ", leftTrack.get_value());
-    //     // printf("Right encoder value: %d ", rightTrack.get_value());
-    //     // printf("Middle encoder value: %d ", middleTrack.get_value());
-	// 	// printf("IMU Rot: %f ", imu.get());
-	// 	// printf("%f ", Timer().millis().getValue());
-	// 	// printf("red bool: %d ", redInBottom);
-	// 	// printf("top bool: %d ", redInTop);
-	// 	// printf("frontDistSens: %f ", frontDistSens.get());
-	// 	// printf("UPPER COLOR: %f ", upperColorSens.getHue());
-	// 	// printf(" LOWER COLOR: %f\n ", lowerColorSens.getHue());
-	// 	// printf("auto: %d", selector::auton);
-	
-	// 	fputs("\n", usd_file_write);
-	// 	fprintf(usd_file_write, "%f, ", Timer().millis().getValue());
-	// 	fputs(myOdomChassis->getState().str().c_str(), usd_file_write);
-	// 	// fprintf(usd_file_write, ", %d", leftTrack.get_value());
-	// 	// fprintf(usd_file_write, ", %d", rightTrack.get_value());
-	// 	// fprintf(usd_file_write, ", %d", middleTrack.get_value());
-	// 	// fprintf(usd_file_write, ", %f", imu.get());
-	// 	fprintf(usd_file_write, ", %f", frontLeftDrive.getPosition());
-	// 	fprintf(usd_file_write, ", %f", backLeftDrive.getPosition());
-	// 	fprintf(usd_file_write, ", %f", frontRightDrive.getPosition());
-	// 	fprintf(usd_file_write, ", %f", backRightDrive.getPosition());
-	// 	fprintf(usd_file_write, ", %d", frontLeftDrive.getVoltage());
-	// 	fprintf(usd_file_write, ", %d", backLeftDrive.getVoltage());
-	// 	fprintf(usd_file_write, ", %d", frontRightDrive.getVoltage());
-	// 	fprintf(usd_file_write, ", %d", backRightDrive.getVoltage());
-	// 	fprintf(usd_file_write, ", %f", frontLeftDrive.getActualVelocity());
-	// 	fprintf(usd_file_write, ", %f", backLeftDrive.getActualVelocity());
-	// 	fprintf(usd_file_write, ", %f", frontRightDrive.getActualVelocity());
-	// 	fprintf(usd_file_write, ", %f", backRightDrive.getActualVelocity());
-	// 	}
-    // });
-	
-	// // set the state to zero
-	// myOdomChassis->setState({0_in, 0_in, 0_deg});
-	// // turn 45 degrees and drive approximately 1.4 ft
-	// myOdomChassis->driveToPoint({2_ft, 0_ft});
-	// // turn approximately 45 degrees to end up at 90 degrees
-	// // myOdomChassis->turnToAngle(90_deg);
-	// // // turn approximately -90 degrees to face {5_ft, 0_ft} which is to the north of the robot
-	// // myOdomChassis->turnToPoint({5_ft, 0_ft});
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {3_ft, 0_ft, 0_deg}}, "S1");
+	straightProfileController->setTarget("S1");
+	straightProfileController->waitUntilSettled();
+
+	turnProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
+	turnProfileController->setTarget("T1");
+	turnProfileController->waitUntilSettled();
+
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {1.4_ft, 0_ft, 0_deg}}, "S2");
+	straightProfileController->setTarget("S2");
+	straightProfileController->waitUntilSettled();
+
+	pros::delay(500);
+
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
+	straightProfileController->setTarget("B", true);
+	straightProfileController->waitUntilSettled();
+
+	turnProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {1.125_ft, 0_ft, 0_deg}}, "T2");
+	turnProfileController->setTarget("T2");
+	turnProfileController->waitUntilSettled();
+
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
+	straightProfileController->setTarget("C");
+	straightProfileController->waitUntilSettled();
+
+	turnProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {0.25_ft, 0_ft, 0_deg}}, "T3");
+	turnProfileController->setTarget("T3", true);
+	turnProfileController->waitUntilSettled();
 }
 
 void opcontrol() {
