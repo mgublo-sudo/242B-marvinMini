@@ -114,7 +114,8 @@ void ballFunctions() {
 
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(2, "marvin mini - woo hoo!");
+	pros::lcd::set_text(3, "\"pretty good for a 242 bot\"");
+	pros::lcd::set_text(4, "-myles 8114A");
 
 	lowerRollers.setGearing(AbstractMotor::gearset::blue);
 	upperRoller.setGearing(AbstractMotor::gearset::blue);
