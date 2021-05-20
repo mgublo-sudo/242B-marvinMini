@@ -21,6 +21,46 @@ Motor backRightDrive (18);
 Motor leftIntake (-11);
 Motor rightIntake (14);
 
+std::shared_ptr<ChassisController> myStraightChassis =
+ChassisControllerBuilder()
+	.withMotors(
+		{frontLeftDrive, backLeftDrive},
+		{frontRightDrive, backRightDrive}
+		)
+	// Green gearset, 4 in wheel diam, 11.5 in wheel track
+	.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})		.build();
+
+std::shared_ptr<AsyncMotionProfileController> straightProfileController = 
+AsyncMotionProfileControllerBuilder()
+	.withLimits({
+	4.0, // Maximum linear velocity of the Chassis in m/s
+	3.0, // Maximum linear acceleration of the Chassis in m/s/s
+	4.0 // Maximum linear jerk of the Chassis in m/s/s/s
+	})
+	.withOutput(myStraightChassis)
+	.buildMotionProfileController();
+
+// 3.2ft is pretty close to 360_deg
+std::shared_ptr<ChassisController> myTurnChassis =
+ChassisControllerBuilder()
+	.withMotors(
+		{frontLeftDrive, backLeftDrive},
+		{-18, -19}
+		)
+	// Green gearset, 4 in wheel diam, 11.5 in wheel track
+	.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
+	.build();
+
+std::shared_ptr<AsyncMotionProfileController> turnProfileController = 
+AsyncMotionProfileControllerBuilder()
+	.withLimits({
+	3.0, // Maximum linear velocity of the Chassis in m/s
+	2.0, // Maximum linear acceleration of the Chassis in m/s/s
+	6.25 // Maximum linear jerk of the Chassis in m/s/s/s
+	})
+	.withOutput(myTurnChassis)
+	.buildMotionProfileController();
+
 //Intakes In Function
 void intakesIn() {
 	leftIntake.moveVelocity(600);
@@ -95,7 +135,6 @@ void ballExtakeSlow() {
 	}
 }
 
-
 void ballFunctions() {
 	while(true) {
 		if (!(intakeBtn.isPressed() | extakeBtn.isPressed() | indexUpBtn.isPressed() | slowExtakeBtn.isPressed())) {
@@ -112,6 +151,27 @@ void ballFunctions() {
 	}
 }
 
+void homeRowAuto() {
+	intakesOut();
+	pros::delay(1500);
+	intakesOff();
+	pros::delay(3000);
+	intakesIn();
+	indexerUp();
+	pros::delay(700);
+	intakesOff();
+	pros::delay(700);
+	indexerOff();
+	pros::delay(7000);
+	intakesIn();
+	indexerUp();
+	pros::delay(750);
+	intakesOff();
+	pros::delay(750);
+	indexerOff();
+}
+pros::Task homeRowAutoTask(homeRowAuto);
+
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(3, "\"pretty good for a 242 bot\"");
@@ -121,10 +181,10 @@ void initialize() {
 	upperRoller.setGearing(AbstractMotor::gearset::blue);
 	leftIntake.setGearing(AbstractMotor::gearset::green);
 	rightIntake.setGearing(AbstractMotor::gearset::green);
-	frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
-  	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
-  	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
-  	backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::brake);
+	frontRightDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
+  	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
+  	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
+  	backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
 }
 
 void disabled() {}
@@ -132,83 +192,97 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-	std::shared_ptr<ChassisController> myStraightChassis =
-	ChassisControllerBuilder()
-		.withMotors(
-			{frontLeftDrive, backLeftDrive},
-			{frontRightDrive, backRightDrive}
-			)
-		// Green gearset, 4 in wheel diam, 11.5 in wheel track
-		.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
-		.build();
+	if (color == 0) {
+		
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
 
-	std::shared_ptr<AsyncMotionProfileController> straightProfileController = 
-	AsyncMotionProfileControllerBuilder()
-		.withLimits({
-		1.0, // Maximum linear velocity of the Chassis in m/s
-		2.0, // Maximum linear acceleration of the Chassis in m/s/s
-		10.0 // Maximum linear jerk of the Chassis in m/s/s/s
-		})
-		.withOutput(myStraightChassis)
-		.buildMotionProfileController();
+		homeRowAutoTask.resume();
 
-	// 3.2ft is pretty close to 360_deg
-	std::shared_ptr<ChassisController> myTurnChassis =
-	ChassisControllerBuilder()
-		.withMotors(
-			{frontLeftDrive, backLeftDrive},
-			{-18, -19}
-			)
-		// Green gearset, 4 in wheel diam, 11.5 in wheel track
-		.withDimensions({AbstractMotor::gearset::green, (36.0 / 60.0)}, {{3.25_in, 9.75_in}, imev5GreenTPR})
-		.build();
+		straightProfileController->setTarget("S1");
+		straightProfileController->waitUntilSettled();
 
-	std::shared_ptr<AsyncMotionProfileController> turnProfileController = 
-	AsyncMotionProfileControllerBuilder()
-		.withLimits({
-		1.5, // Maximum linear velocity of the Chassis in m/s
-		2.0, // Maximum linear acceleration of the Chassis in m/s/s
-		10.0 // Maximum linear jerk of the Chassis in m/s/s/s
-		})
-		.withOutput(myTurnChassis)
-		.buildMotionProfileController();
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
+		turnProfileController->setTarget("T1");
+		turnProfileController->waitUntilSettled();
 
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {3_ft, 0_ft, 0_deg}}, "S1");
-	straightProfileController->setTarget("S1");
-	straightProfileController->waitUntilSettled();
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
+		straightProfileController->setTarget("S2");
+		straightProfileController->waitUntilSettled();
 
-	turnProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
-	turnProfileController->setTarget("T1");
-	turnProfileController->waitUntilSettled();
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
+		straightProfileController->setTarget("B", true);
+		straightProfileController->waitUntilSettled();
 
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {1.4_ft, 0_ft, 0_deg}}, "S2");
-	straightProfileController->setTarget("S2");
-	straightProfileController->waitUntilSettled();
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
+		turnProfileController->setTarget("T2");
+		turnProfileController->waitUntilSettled();
 
-	pros::delay(500);
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
+		straightProfileController->setTarget("C");
+		straightProfileController->waitUntilSettled();
 
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
-	straightProfileController->setTarget("B", true);
-	straightProfileController->waitUntilSettled();
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {0.3_ft, 0_ft, 0_deg}}, "T3");
+		turnProfileController->setTarget("T3", true);
+		turnProfileController->waitUntilSettled();
 
-	turnProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {1.125_ft, 0_ft, 0_deg}}, "T2");
-	turnProfileController->setTarget("T2");
-	turnProfileController->waitUntilSettled();
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.25_ft, 0_ft, 0_deg}}, "D");
+		straightProfileController->setTarget("D");
+		straightProfileController->waitUntilSettled();
 
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
-	straightProfileController->setTarget("C");
-	straightProfileController->waitUntilSettled();
+	} else if (color == 1) {
 
-	turnProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {0.25_ft, 0_ft, 0_deg}}, "T3");
-	turnProfileController->setTarget("T3", true);
-	turnProfileController->waitUntilSettled();
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
+
+		homeRowAutoTask.resume();
+
+		straightProfileController->setTarget("S1");
+		straightProfileController->waitUntilSettled();
+
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
+		turnProfileController->setTarget("T1");
+		turnProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
+		straightProfileController->setTarget("S2");
+		straightProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
+		straightProfileController->setTarget("B", true);
+		straightProfileController->waitUntilSettled();
+
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
+		turnProfileController->setTarget("T2");
+		turnProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
+		straightProfileController->setTarget("C");
+		straightProfileController->waitUntilSettled();
+
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {0.3_ft, 0_ft, 0_deg}}, "T3");
+		turnProfileController->setTarget("T3", true);
+		turnProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.25_ft, 0_ft, 0_deg}}, "D");
+		straightProfileController->setTarget("D");
+		straightProfileController->waitUntilSettled();
+
+	}
 }
 
 void opcontrol() {
