@@ -164,8 +164,6 @@ void ballFunctions() {
 	}
 }
 
-
-
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::register_btn1_cb(on_center_button);
@@ -209,7 +207,7 @@ void autonomous() {
 
 	pros::Task homeRowAutoTask(homeRowAuto);
 
-	if (color == 0) {
+	if (color == 0) { //red
 
 		straightProfileController->generatePath(
 			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
@@ -254,7 +252,7 @@ void autonomous() {
 		straightProfileController->setTarget("D");
 		straightProfileController->waitUntilSettled();
 
-	} else if (color == 1) {
+	} else if (color == 1) { //blue
 
 		straightProfileController->generatePath(
 			{{0_ft, 0_ft, 0_deg}, {2.8_ft, 0_ft, 0_deg}}, "S1");
