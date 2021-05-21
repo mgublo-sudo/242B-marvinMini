@@ -20,6 +20,19 @@ Motor frontRightDrive (19);
 Motor backRightDrive (18);
 Motor leftIntake (-11);
 Motor rightIntake (14);
+double color = 0;
+
+void on_center_button() {
+	static bool pressed = false;
+	pressed = !pressed;
+	if (pressed) {
+		color = 0;
+		pros::lcd::set_text(2, "RED");
+	} else {
+		color = 1;
+		pros::lcd::set_text(2, "BLUE");
+	}
+}
 
 std::shared_ptr<ChassisController> myStraightChassis =
 ChassisControllerBuilder()
@@ -151,29 +164,11 @@ void ballFunctions() {
 	}
 }
 
-void homeRowAuto() {
-	intakesOut();
-	pros::delay(1500);
-	intakesOff();
-	pros::delay(3000);
-	intakesIn();
-	indexerUp();
-	pros::delay(700);
-	intakesOff();
-	pros::delay(700);
-	indexerOff();
-	pros::delay(7000);
-	intakesIn();
-	indexerUp();
-	pros::delay(750);
-	intakesOff();
-	pros::delay(750);
-	indexerOff();
-}
-pros::Task homeRowAutoTask(homeRowAuto);
+
 
 void initialize() {
 	pros::lcd::initialize();
+	pros::lcd::register_btn1_cb(on_center_button);
 	pros::lcd::set_text(3, "\"pretty good for a 242 bot\"");
 	pros::lcd::set_text(4, "-myles 8114A");
 
@@ -191,9 +186,31 @@ void disabled() {}
 
 void competition_initialize() {}
 
+void homeRowAuto() {
+	intakesOut();
+	pros::delay(1500);
+	intakesOff();
+	pros::delay(3000);
+	intakesIn();
+	indexerUp();
+	pros::delay(700);
+	intakesOff();
+	pros::delay(700);
+	indexerOff();
+	pros::delay(7000);
+	intakesIn();
+	indexerUp();
+	pros::delay(1500);
+	indexerOff();
+	intakesOff();
+}
+
 void autonomous() {
+
+	pros::Task homeRowAutoTask(homeRowAuto);
+
 	if (color == 0) {
-		
+
 		straightProfileController->generatePath(
 			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
 
@@ -240,7 +257,7 @@ void autonomous() {
 	} else if (color == 1) {
 
 		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
+			{{0_ft, 0_ft, 0_deg}, {2.8_ft, 0_ft, 0_deg}}, "S1");
 
 		homeRowAutoTask.resume();
 
@@ -263,22 +280,22 @@ void autonomous() {
 		straightProfileController->waitUntilSettled();
 
 		turnProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
+			{{0_ft, 0_ft, 0_deg}, {1.25_ft, 0_ft, 0_deg}}, "T2");
 		turnProfileController->setTarget("T2");
 		turnProfileController->waitUntilSettled();
 
 		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
+			{{0_ft, 0_ft, 0_deg}, {6.0_ft, 0_ft, 0_deg}}, "C");
 		straightProfileController->setTarget("C");
 		straightProfileController->waitUntilSettled();
 
 		turnProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {0.3_ft, 0_ft, 0_deg}}, "T3");
+			{{0_ft, 0_ft, 0_deg}, {0.45_ft, 0_ft, 0_deg}}, "T3");
 		turnProfileController->setTarget("T3", true);
 		turnProfileController->waitUntilSettled();
 
 		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {1.25_ft, 0_ft, 0_deg}}, "D");
+			{{0_ft, 0_ft, 0_deg}, {2.0_ft, 0_ft, 0_deg}}, "D");
 		straightProfileController->setTarget("D");
 		straightProfileController->waitUntilSettled();
 
@@ -288,7 +305,7 @@ void autonomous() {
 void opcontrol() {
 	// pros::delay(500);
 	// fclose(usd_file_write);
-
+	//homeRowAutoTask.suspend();
 	std::shared_ptr<ChassisController> drive = ChassisControllerBuilder()
 	 .withMotors(
 		 {frontLeftDrive, backLeftDrive},
