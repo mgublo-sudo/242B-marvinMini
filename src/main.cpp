@@ -191,16 +191,19 @@ void homeRowAuto() {
 	pros::delay(3000);
 	intakesIn();
 	indexerUp();
-	pros::delay(700);
+	pros::delay(900);
 	intakesOff();
-	pros::delay(700);
+	pros::delay(500);
 	indexerOff();
-	pros::delay(7000);
+	intakesOut();
+	pros::delay(1000);
+	intakesOff();
+	pros::delay(6000);
 	intakesIn();
 	indexerUp();
-	pros::delay(1500);
-	indexerOff();
-	intakesOff();
+	// pros::delay(1500);
+	// indexerOff();
+	// intakesOff();
 }
 
 void autonomous() {
@@ -243,12 +246,12 @@ void autonomous() {
 	// 	straightProfileController->waitUntilSettled();
 
 	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {0.3_ft, 0_ft, 0_deg}}, "T3");
+	// 		{{0_ft, 0_ft, 0_deg}, {0.4_ft, 0_ft, 0_deg}}, "T3");
 	// 	turnProfileController->setTarget("T3", true);
 	// 	turnProfileController->waitUntilSettled();
 
 	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {1.25_ft, 0_ft, 0_deg}}, "D");
+	// 		{{0_ft, 0_ft, 0_deg}, {1.5_ft, 0_ft, 0_deg}}, "D");
 	// 	straightProfileController->setTarget("D");
 	// 	straightProfileController->waitUntilSettled();
 
@@ -298,6 +301,45 @@ void autonomous() {
 	// 	straightProfileController->waitUntilSettled();
 
 	// }
+
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid1");
+	straightProfileController->setTarget("Mid1");
+	intakesIn();
+	straightProfileController->waitUntilSettled();
+	intakesOff();
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {2_ft, 0_ft, 0_deg}}, "Mid2");
+	straightProfileController->setTarget("Mid2", true);
+	lowerIndexer();
+	pros::delay(2000);
+	lowerIndexerOff();
+	straightProfileController->waitUntilSettled();
+	turnProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {0.35_ft, 0_ft, 0_deg}}, "MidT1");
+	turnProfileController->setTarget("MidT1");
+	turnProfileController->waitUntilSettled();
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {2.75_ft, 0_ft, 0_deg}}, "Mid3");
+	straightProfileController->setTarget("Mid3");
+	intakesIn();
+	straightProfileController->waitUntilSettled();
+	intakesOff();
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {0.5_ft, 0_ft, 0_deg}}, "Mid4");
+	straightProfileController->setTarget("Mid4", true);
+	straightProfileController->waitUntilSettled();
+		turnProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {0.1_ft, 0_ft, 0_deg}}, "MidT2");
+	turnProfileController->setTarget("MidT2");
+	turnProfileController->waitUntilSettled();
+	turnProfileController->waitUntilSettled();
+	straightProfileController->generatePath(
+		{{0_ft, 0_ft, 0_deg}, {0.75_ft, 0_ft, 0_deg}}, "Mid5");
+	straightProfileController->setTarget("Mid5");
+	straightProfileController->waitUntilSettled();
+	indexerUp();
+
 }
 
 void opcontrol() {
