@@ -27,10 +27,10 @@ void on_center_button() {
 	pressed = !pressed;
 	if (pressed) {
 		color = 0;
-		pros::lcd::set_text(2, "RED");
+		pros::lcd::set_text(2, "HOME ROW");
 	} else {
 		color = 1;
-		pros::lcd::set_text(2, "BLUE");
+		pros::lcd::set_text(2, "MIDDLE");
 	}
 }
 
@@ -208,137 +208,84 @@ void homeRowAuto() {
 
 void autonomous() {
 
-	// pros::Task homeRowAutoTask(homeRowAuto);
+	pros::Task homeRowAutoTask(homeRowAuto);
 
-	// if (color == 0) { //red
+	if (color == 0) { //homerow default
 
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
 
-	// 	homeRowAutoTask.resume();
+		homeRowAutoTask.resume();
 
-	// 	straightProfileController->setTarget("S1");
-	// 	straightProfileController->waitUntilSettled();
+		straightProfileController->setTarget("S1");
+		straightProfileController->waitUntilSettled();
 
-	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
-	// 	turnProfileController->setTarget("T1");
-	// 	turnProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
-	// 	straightProfileController->setTarget("S2");
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
-	// 	straightProfileController->setTarget("B", true);
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
-	// 	turnProfileController->setTarget("T2");
-	// 	turnProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
-	// 	straightProfileController->setTarget("C");
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {0.4_ft, 0_ft, 0_deg}}, "T3");
-	// 	turnProfileController->setTarget("T3", true);
-	// 	turnProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {1.5_ft, 0_ft, 0_deg}}, "D");
-	// 	straightProfileController->setTarget("D");
-	// 	straightProfileController->waitUntilSettled();
-
-	// } else if (color == 1) { //blue
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {2.8_ft, 0_ft, 0_deg}}, "S1");
-
-	// 	homeRowAutoTask.resume();
-
-	// 	straightProfileController->setTarget("S1");
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
-	// 	turnProfileController->setTarget("T1");
-	// 	turnProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
-	// 	straightProfileController->setTarget("S2");
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
-	// 	straightProfileController->setTarget("B", true);
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {1.25_ft, 0_ft, 0_deg}}, "T2");
-	// 	turnProfileController->setTarget("T2");
-	// 	turnProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {6.0_ft, 0_ft, 0_deg}}, "C");
-	// 	straightProfileController->setTarget("C");
-	// 	straightProfileController->waitUntilSettled();
-
-	// 	turnProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {0.45_ft, 0_ft, 0_deg}}, "T3");
-	// 	turnProfileController->setTarget("T3", true);
-	// 	turnProfileController->waitUntilSettled();
-
-	// 	straightProfileController->generatePath(
-	// 		{{0_ft, 0_ft, 0_deg}, {2.0_ft, 0_ft, 0_deg}}, "D");
-	// 	straightProfileController->setTarget("D");
-	// 	straightProfileController->waitUntilSettled();
-
-	// }
-
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid1");
-	straightProfileController->setTarget("Mid1");
-	intakesIn();
-	straightProfileController->waitUntilSettled();
-	intakesOff();
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {2_ft, 0_ft, 0_deg}}, "Mid2");
-	straightProfileController->setTarget("Mid2", true);
-	lowerIndexer();
-	pros::delay(2000);
-	lowerIndexerOff();
-	straightProfileController->waitUntilSettled();
-	turnProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {0.35_ft, 0_ft, 0_deg}}, "MidT1");
-	turnProfileController->setTarget("MidT1");
-	turnProfileController->waitUntilSettled();
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {2.75_ft, 0_ft, 0_deg}}, "Mid3");
-	straightProfileController->setTarget("Mid3");
-	intakesIn();
-	straightProfileController->waitUntilSettled();
-	intakesOff();
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {0.5_ft, 0_ft, 0_deg}}, "Mid4");
-	straightProfileController->setTarget("Mid4", true);
-	straightProfileController->waitUntilSettled();
 		turnProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {0.1_ft, 0_ft, 0_deg}}, "MidT2");
-	turnProfileController->setTarget("MidT2");
-	turnProfileController->waitUntilSettled();
-	turnProfileController->waitUntilSettled();
-	straightProfileController->generatePath(
-		{{0_ft, 0_ft, 0_deg}, {0.75_ft, 0_ft, 0_deg}}, "Mid5");
-	straightProfileController->setTarget("Mid5");
-	straightProfileController->waitUntilSettled();
-	indexerUp();
+			{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
+		turnProfileController->setTarget("T1");
+		turnProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
+		straightProfileController->setTarget("S2");
+		straightProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
+		straightProfileController->setTarget("B", true);
+		straightProfileController->waitUntilSettled();
+
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
+		turnProfileController->setTarget("T2");
+		turnProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
+		straightProfileController->setTarget("C");
+		straightProfileController->waitUntilSettled();
+
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {0.4_ft, 0_ft, 0_deg}}, "T3");
+		turnProfileController->setTarget("T3", true);
+		turnProfileController->waitUntilSettled();
+
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {1.5_ft, 0_ft, 0_deg}}, "D");
+		straightProfileController->setTarget("D");
+		straightProfileController->waitUntilSettled();
+
+	} else if (color == 1) { //middle
+		intakesOut();
+		pros::delay(500);
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid1");
+		straightProfileController->setTarget("Mid1");
+		intakesIn();
+		straightProfileController->waitUntilSettled();
+		intakesOff();
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {3_ft, 0_ft, 0_deg}}, "Mid2");
+		straightProfileController->setTarget("Mid2", true);
+		lowerIndexer();
+		pros::delay(1000);
+		lowerIndexerOff();
+		straightProfileController->waitUntilSettled();
+		turnProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {0.35_ft, 0_ft, 0_deg}}, "MidT1");
+		turnProfileController->setTarget("MidT1");
+		turnProfileController->waitUntilSettled();
+		straightProfileController->generatePath(
+			{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid3");
+		straightProfileController->setTarget("Mid3");
+		straightProfileController->waitUntilSettled();
+		indexerUp();
+		pros::delay(500);
+		indexerDown();
+		pros::delay(750);
+		indexerUp();
+	}
+
 
 }
 
