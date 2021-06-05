@@ -291,6 +291,15 @@ void autonomous() {
 }
 
 void opcontrol() {
+	//PET: Vision code
+	pros::Vision v_sensor (16, pros::vision_zero_e_t::E_VISION_ZERO_CENTER);
+
+	pros::vision_signature_s_t YELL =
+	pros::Vision::signature_from_utility(1, 4891, 7963, 6427, -5617, -3789, -4703, 2.200, 0);
+
+	v_sensor.set_signature(1, &YELL);
+
+
 	// pros::delay(500);
 	// fclose(usd_file_write);
 	//homeRowAutoTask.suspend();
@@ -308,6 +317,13 @@ void opcontrol() {
 	while (true) {
 		drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
 									controller.getAnalog(ControllerAnalog::rightX));
+
+		//PET: Vision code
+		pros::vision_object_s_t rtn = v_sensor.get_by_sig(0, 1);
+    	// Gets the largest object of the EXAMPLE_SIG signature
+    	//std::cout << "sig: " << rtn.signature << std::endl;
+		//Find coordinate of signature
+		std::cout << "sig: " << rtn.x_middle_coord << std::endl;
 
 		pros::delay(20);
 	}
