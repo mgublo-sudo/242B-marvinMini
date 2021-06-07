@@ -6,7 +6,6 @@ using namespace okapi;
 // FILE FOR SD CARD
 // FILE * usd_file_write = fopen("/usd/example.txt", "w");
 
-
 Controller controller;
 ControllerButton indexUpBtn (ControllerDigital::L1);
 ControllerButton extakeBtn (ControllerDigital::L2);
@@ -21,6 +20,34 @@ Motor frontRightDrive (19);
 Motor backRightDrive (18);
 Motor leftIntake (-11);
 Motor rightIntake (14);
+
+/*
+//PET: Vision setup
+//Throwaway: , pros::vision_zero_e_t::E_VISION_ZERO_CENTER
+pros::Vision v_sensor (6);
+pros::Motor LeftFront(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor LeftBack(19, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor RightFront(17, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor RightBack(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_COUNTS);
+
+//In Rotate:
+	//PET: Vision code
+	pros::vision_object_s_t rtn;
+	pros::vision_signature_s_t GOAL;
+
+		  			rtn = v_sensor.get_by_sig(0, 1);
+			//Pet: Initialize Vision
+			GOAL = pros::Vision::signature_from_utility(1, -4445, -923, -2684, -7239, -2979, -5109, 1.600, 0);
+
+			v_sensor.set_signature(1, &GOAL);
+
+		rtn = v_sensor.get_by_sig(0, 1);
+		midGoal = rtn.x_middle_coord;
+
+		std::cout << "sig: " << rtn.signature << std::endl;
+*/
+
+
 double color = 0;
 
 void on_center_button() {
@@ -165,6 +192,16 @@ void ballFunctions() {
 	}
 }
 
+//Pet: Helper Functions
+void setDrive(int left, int right) {
+  LeftFront = left;
+  LeftBack = left;
+  RightFront = right;
+  RightBack = right;
+
+}
+
+
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::register_btn1_cb(on_center_button);
@@ -179,6 +216,7 @@ void initialize() {
   	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
   	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
   	backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
+
 }
 
 void disabled() {}
@@ -209,97 +247,91 @@ void homeRowAuto() {
 
 void autonomous() {
 
-	pros::Task homeRowAutoTask(homeRowAuto);
+	//pros::Task homeRowAutoTask(homeRowAuto);
 
 	if (color == 0) { //homerow default
 
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
+		rotate(150, 0);
 
-		homeRowAutoTask.resume();
 
-		straightProfileController->setTarget("S1");
-		straightProfileController->waitUntilSettled();
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
 
-		turnProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
-		turnProfileController->setTarget("T1");
-		turnProfileController->waitUntilSettled();
+	// 	homeRowAutoTask.resume();
 
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
-		straightProfileController->setTarget("S2");
-		straightProfileController->waitUntilSettled();
+	// 	straightProfileController->setTarget("S1");
+	// 	straightProfileController->waitUntilSettled();
 
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
-		straightProfileController->setTarget("B", true);
-		straightProfileController->waitUntilSettled();
+	// 	turnProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {0.57_ft, 0_ft, 0_deg}}, "T1");
+	// 	turnProfileController->setTarget("T1");
+	// 	turnProfileController->waitUntilSettled();
 
-		turnProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
-		turnProfileController->setTarget("T2");
-		turnProfileController->waitUntilSettled();
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "S2");
+	// 	straightProfileController->setTarget("S2");
+	// 	straightProfileController->waitUntilSettled();
 
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
-		straightProfileController->setTarget("C");
-		straightProfileController->waitUntilSettled();
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {-3_ft, 0_ft, 0_deg}}, "B");
+	// 	straightProfileController->setTarget("B", true);
+	// 	straightProfileController->waitUntilSettled();
 
-		turnProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {0.4_ft, 0_ft, 0_deg}}, "T3");
-		turnProfileController->setTarget("T3", true);
-		turnProfileController->waitUntilSettled();
+	// 	turnProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {1.20_ft, 0_ft, 0_deg}}, "T2");
+	// 	turnProfileController->setTarget("T2");
+	// 	turnProfileController->waitUntilSettled();
 
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {1.5_ft, 0_ft, 0_deg}}, "D");
-		straightProfileController->setTarget("D");
-		straightProfileController->waitUntilSettled();
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "C");
+	// 	straightProfileController->setTarget("C");
+	// 	straightProfileController->waitUntilSettled();
 
-	} else if (color == 1) { //middle
-		intakesOut();
-		pros::delay(500);
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid1");
-		straightProfileController->setTarget("Mid1");
-		intakesIn();
-		straightProfileController->waitUntilSettled();
-		intakesOff();
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {3_ft, 0_ft, 0_deg}}, "Mid2");
-		straightProfileController->setTarget("Mid2", true);
-		lowerIndexer();
-		pros::delay(1000);
-		lowerIndexerOff();
-		straightProfileController->waitUntilSettled();
-		turnProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {0.35_ft, 0_ft, 0_deg}}, "MidT1");
-		turnProfileController->setTarget("MidT1");
-		turnProfileController->waitUntilSettled();
-		straightProfileController->generatePath(
-			{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid3");
-		straightProfileController->setTarget("Mid3");
-		straightProfileController->waitUntilSettled();
-		indexerUp();
-		pros::delay(500);
-		indexerDown();
-		pros::delay(750);
-		indexerUp();
-	}
+	// 	turnProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {0.4_ft, 0_ft, 0_deg}}, "T3");
+	// 	turnProfileController->setTarget("T3", true);
+	// 	turnProfileController->waitUntilSettled();
+
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {1.5_ft, 0_ft, 0_deg}}, "D");
+	// 	straightProfileController->setTarget("D");
+	// 	straightProfileController->waitUntilSettled();
+
+	 } //else if (color == 1) { //middle
+	// 	intakesOut();
+	// 	pros::delay(500);
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid1");
+	// 	straightProfileController->setTarget("Mid1");
+	// 	intakesIn();
+	// 	straightProfileController->waitUntilSettled();
+	// 	intakesOff();
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {3_ft, 0_ft, 0_deg}}, "Mid2");
+	// 	straightProfileController->setTarget("Mid2", true);
+	// 	lowerIndexer();
+	// 	pros::delay(1000);
+	// 	lowerIndexerOff();
+	// 	straightProfileController->waitUntilSettled();
+	// 	turnProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {0.35_ft, 0_ft, 0_deg}}, "MidT1");
+	// 	turnProfileController->setTarget("MidT1");
+	// 	turnProfileController->waitUntilSettled();
+	// 	straightProfileController->generatePath(
+	// 		{{0_ft, 0_ft, 0_deg}, {3.75_ft, 0_ft, 0_deg}}, "Mid3");
+	// 	straightProfileController->setTarget("Mid3");
+	// 	straightProfileController->waitUntilSettled();
+	// 	indexerUp();
+	// 	pros::delay(500);
+	// 	indexerDown();
+	// 	pros::delay(750);
+	// 	indexerUp();
+	// }
 
 
 }
 
 void opcontrol() {
-	//PET: Vision code
-	pros::Vision v_sensor (16, pros::vision_zero_e_t::E_VISION_ZERO_CENTER);
-
-	pros::vision_signature_s_t YELL =
-	pros::Vision::signature_from_utility(1, 4891, 7963, 6427, -5617, -3789, -4703, 2.200, 0);
-
-	v_sensor.set_signature(1, &YELL);
-
-
 	// pros::delay(500);
 	// fclose(usd_file_write);
 	//homeRowAutoTask.suspend();
@@ -317,13 +349,6 @@ void opcontrol() {
 	while (true) {
 		drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
 									controller.getAnalog(ControllerAnalog::rightX));
-
-		//PET: Vision code
-		pros::vision_object_s_t rtn = v_sensor.get_by_sig(0, 1);
-    	// Gets the largest object of the EXAMPLE_SIG signature
-    	//std::cout << "sig: " << rtn.signature << std::endl;
-		//Find coordinate of signature
-		std::cout << "sig: " << rtn.x_middle_coord << std::endl;
 
 		pros::delay(20);
 	}
