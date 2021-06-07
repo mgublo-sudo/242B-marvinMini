@@ -23,6 +23,8 @@ Motor rightIntake (14);
 
 /*
 //PET: Vision setup
+//PROS TIPS:
+// pros upload --name VisTest6 --slot 2
 //Throwaway: , pros::vision_zero_e_t::E_VISION_ZERO_CENTER
 pros::Vision v_sensor (6);
 pros::Motor LeftFront(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_COUNTS);
@@ -46,6 +48,13 @@ pros::Motor RightBack(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER
 
 		std::cout << "sig: " << rtn.signature << std::endl;
 */
+
+//Pet: IMU Attempt
+pros::Imu inertialSensor(13);
+pros::Motor LeftFront(18, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor LeftBack(19, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor RightFront(17, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor RightBack(20, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 
 
 double color = 0;
@@ -193,13 +202,51 @@ void ballFunctions() {
 }
 
 //Pet: Helper Functions
-void setDrive(int left, int right) {
+void setTurnDrive(int left, int right) {
   LeftFront = left;
   LeftBack = left;
   RightFront = right;
   RightBack = right;
 
 }
+
+void rotate(double angle, int number) {
+  bool direction = fabs(angle - inertialSensor.get_heading()) / (angle - inertialSensor.get_heading()) == 1;
+
+  double kP = 3;
+  double kD = 30;
+  double error;
+  double prevError;
+  double derivative;
+  double output;
+  double done = 0;
+
+  double myH = inertialSensor.get_heading();
+
+  while (done < 5) {
+	  myH = inertialSensor.get_heading()+2;
+	  std::cout << myH << std::endl;
+	  pros::delay(500);
+
+    prevError = angle - inertialSensor.get_heading();
+    pros::delay(10);
+    error = angle - inertialSensor.get_heading();
+    derivative = error - prevError;
+    output = direction ? fmin(85, error * kP + derivative * kD) : fmax(-85, error * kP + derivative * kD);
+    if(number == 1 && done == 0){
+      output = fabs(output);
+    }
+    else if (number == 2 && done == 0){
+      output = -output;
+    }
+    setTurnDrive(output, -output);
+    if (fabs(error) < 2) {
+      done += 1;
+    }
+  }
+  setTurnDrive(0, 0);
+}
+
 
 
 void initialize() {
@@ -216,6 +263,12 @@ void initialize() {
   	frontLeftDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
   	backRightDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
   	backLeftDrive.setBrakeMode(AbstractMotor::brakeMode::hold);
+
+	  //Pet: IMU Turning
+	  	inertialSensor.reset();
+	while (inertialSensor.is_calibrating()){
+		pros::delay(10);
+	}
 
 }
 
@@ -247,12 +300,11 @@ void homeRowAuto() {
 
 void autonomous() {
 
+	rotate(180, 1);
+
 	//pros::Task homeRowAutoTask(homeRowAuto);
 
-	if (color == 0) { //homerow default
-
-		rotate(150, 0);
-
+	//if (color == 0) { //homerow default
 
 	// 	straightProfileController->generatePath(
 	// 		{{0_ft, 0_ft, 0_deg}, {2.9_ft, 0_ft, 0_deg}}, "S1");
@@ -297,7 +349,7 @@ void autonomous() {
 	// 	straightProfileController->setTarget("D");
 	// 	straightProfileController->waitUntilSettled();
 
-	 } //else if (color == 1) { //middle
+	 //} //else if (color == 1) { //middle
 	// 	intakesOut();
 	// 	pros::delay(500);
 	// 	straightProfileController->generatePath(
